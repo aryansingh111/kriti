@@ -1,0 +1,98 @@
+// Builds src/components/pages/indiaMapData.ts from a states GeoJSON of India.
+//
+// Source: DataMeet "states.geojson" (https://github.com/datameet/maps), which follows India's official boundaries.
+// Usage:  node scripts/gen-india-map.mjs path/to/states.geojson
+//
+// Each ring is projected (equirectangular, scaled by cos 22.5 deg so shapes look right), simplified with
+// Douglas-Peucker and written as an SVG path. Cities are projected the same way and their marker positions are
+// nudged apart so nearby cities (Delhi NCR, Kerala, Pune and Mumbai) do not sit on top of each other.
+import fs from 'node:fs'
+
+const src = process.argv[2]
+if (!src) throw new Error('pass the path to states.geojson')
+const geo = JSON.parse(fs.readFileSync(src, 'utf8'))
+
+const LON0 = 68.0, LON1 = 97.5, LAT0 = 6.6, LAT1 = 37.2, K = 21.5, PAD = 14
+const COS = Math.cos((22.5 * Math.PI) / 180)
+const proj = (lon, lat) => [PAD + (lon - LON0) * COS * K, PAD + (LAT1 - lat) * K]
+const W = Math.round(PAD * 2 + (LON1 - LON0) * COS * K)
+const H = Math.round(PAD * 2 + (LAT1 - LAT0) * K)
+
+function simplify(pts, eps) {
+  if (pts.length < 3) return pts
+  const keep = new Uint8Array(pts.length); keep[0] = keep[pts.length - 1] = 1
+  const stack = [[0, pts.length - 1]]
+  while (stack.length) {
+    const [a, b] = stack.pop()
+    let max = 0, idx = -1
+    const [ax, ay] = pts[a], [bx, by] = pts[b]
+    const dx = bx - ax, dy = by - ay, len = Math.hypot(dx, dy) || 1e-9
+    for (let i = a + 1; i < b; i++) {
+      const d = Math.abs((pts[i][0] - ax) * dy - (pts[i][1] - ay) * dx) / len
+      if (d > max) { max = d; idx = i }
+    }
+    if (max > eps && idx > 0) { keep[idx] = 1; stack.push([a, idx], [idx, b]) }
+  }
+  return pts.filter((_, i) => keep[i])
+}
+/** Rings start and end at the same point, so split at the farthest point and simplify each half. */
+function simplifyRing(ring, eps) {
+  let far = 0, best = 0
+  for (let i = 1; i < ring.length; i++) { const d = Math.hypot(ring[i][0] - ring[0][0], ring[i][1] - ring[0][1]); if (d > best) { best = d; far = i } }
+  if (far === 0) return ring
+  const a = simplify(ring.slice(0, far + 1), eps), b = simplify(ring.slice(far), eps)
+  return [...a, ...b.slice(1)]
+}
+const area = (r) => { let s = 0; for (let i = 0; i < r.length; i++) { const [x1, y1] = r[i], [x2, y2] = r[(i + 1) % r.length]; s += x1 * y2 - x2 * y1 } return Math.abs(s / 2) }
+
+const NAMES = { 'Andaman & Nicobar Island': 'Andaman and Nicobar', 'Arunanchal Pradesh': 'Arunachal Pradesh', 'Dadara & Nagar Havelli': 'Dadra and Nagar Haveli', 'Daman & Diu': 'Daman and Diu', 'Jammu & Kashmir': 'Jammu and Kashmir', 'NCT of Delhi': 'Delhi' }
+const states = geo.features.map((f) => {
+  const g = f.geometry
+  const polys = g.type === 'Polygon' ? [g.coordinates] : g.coordinates
+  let d = ''
+  for (const poly of polys) for (const ring of poly) {
+    const pts = simplifyRing(ring.map(([lo, la]) => proj(lo, la)), 0.7)
+    if (pts.length < 4 || area(pts) < 2.2) continue
+    d += 'M' + pts.map(([x, y]) => `${x.toFixed(1)} ${y.toFixed(1)}`).join('L') + 'Z'
+  }
+  const raw = f.properties.ST_NM
+  return { name: NAMES[raw] ?? raw, d }
+})
+
+// [city, state, lat, lon]
+const CITIES = [
+  ['New Delhi', 'Delhi', 28.61, 77.21], ['Gurugram', 'Haryana', 28.46, 77.03], ['Noida', 'Uttar Pradesh', 28.54, 77.39], ['Faridabad', 'Haryana', 28.41, 77.31],
+  ['Chandigarh', 'Chandigarh', 30.73, 76.78], ['Ludhiana', 'Punjab', 30.9, 75.86], ['Lucknow', 'Uttar Pradesh', 26.85, 80.95], ['Jaipur', 'Rajasthan', 26.91, 75.79],
+  ['Mumbai', 'Maharashtra', 19.08, 72.88], ['Pune', 'Maharashtra', 18.52, 73.86], ['Nagpur', 'Maharashtra', 21.15, 79.09], ['Ahmedabad', 'Gujarat', 23.02, 72.57],
+  ['Surat', 'Gujarat', 21.17, 72.83], ['Vadodara', 'Gujarat', 22.31, 73.18], ['Indore', 'Madhya Pradesh', 22.72, 75.86], ['Bhopal', 'Madhya Pradesh', 23.26, 77.41],
+  ['Bengaluru', 'Karnataka', 12.97, 77.59], ['Mangaluru', 'Karnataka', 12.91, 74.86], ['Chennai', 'Tamil Nadu', 13.08, 80.27], ['Vellore', 'Tamil Nadu', 12.92, 79.13],
+  ['Hyderabad', 'Telangana', 17.39, 78.49], ['Kochi', 'Kerala', 9.93, 76.27], ['Kottayam', 'Kerala', 9.59, 76.52], ['Thiruvananthapuram', 'Kerala', 8.52, 76.94],
+  ['Kolkata', 'West Bengal', 22.57, 88.36], ['Patna', 'Bihar', 25.59, 85.14], ['Bhubaneswar', 'Odisha', 20.3, 85.82], ['Guwahati', 'Assam', 26.14, 91.74],
+].map(([name, state, lat, lon]) => { const [x, y] = proj(lon, lat); return { name, state, x, y, bx: x, by: y } })
+
+// push markers apart (each needs about 27 units of room), with a weak pull back to the true spot
+const MIN = 27
+for (let it = 0; it < 400; it++) {
+  for (const a of CITIES) for (const b of CITIES) {
+    if (a === b) continue
+    const dx = a.bx - b.bx, dy = a.by - b.by, d = Math.hypot(dx, dy) || 0.01
+    if (d < MIN) { const push = (MIN - d) / 2; a.bx += (dx / d) * push * 0.5; a.by += (dy / d) * push * 0.5 }
+  }
+  for (const a of CITIES) { a.bx += (a.x - a.bx) * 0.01; a.by += (a.y - a.by) * 0.01 }
+}
+const r1 = (n) => Math.round(n * 10) / 10
+
+const out = `// Generated by scripts/gen-india-map.mjs - do not edit by hand.
+// Outlines: DataMeet (https://github.com/datameet/maps), India's official state boundaries, simplified for the web.
+
+export const MAP_W = ${W}
+export const MAP_H = ${H}
+
+/** One SVG path per state or union territory. */
+export const STATE_PATHS: { name: string; d: string }[] = ${JSON.stringify(states)}
+
+/** x, y is the true place; bx, by is where its marker is drawn (nudged so neighbours do not overlap). */
+export const CITY_POINTS: { name: string; state: string; x: number; y: number; bx: number; by: number }[] = ${JSON.stringify(CITIES.map((c) => ({ name: c.name, state: c.state, x: r1(c.x), y: r1(c.y), bx: r1(c.bx), by: r1(c.by) })))}
+`
+fs.writeFileSync('src/components/pages/indiaMapData.ts', out)
+console.log('viewBox', W, H, 'states', states.length, 'bytes', out.length, 'max nudge', Math.max(...CITIES.map((c) => Math.hypot(c.bx - c.x, c.by - c.y))).toFixed(1))

@@ -1,0 +1,418 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme inline {
+  --font-sans: 'Figtree Variable', 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Plus Jakarta Sans Variable', 'Figtree Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Source Code Pro', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-edge: var(--brand-edge);
+  --color-brand-2: var(--brand-2);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-soft-2: var(--brand-soft-2);
+  --color-brand-ink: var(--brand-ink);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-bad: var(--bad);
+  --color-stage: var(--stage);
+  --color-saffron: var(--saffron);
+  --color-saffron-deep: var(--saffron-deep);
+  --color-saffron-soft: var(--saffron-soft);
+  --color-navy: var(--navy);
+  --color-navy-soft: var(--navy-soft);
+
+  --radius-xs: 0.25rem;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
+  --radius-3xl: 1.75rem;
+
+  --shadow-card: 0 1px 2px rgb(12 34 24 / 0.05), 0 4px 14px -4px rgb(12 34 24 / 0.10);
+  --shadow-pop: 0 2px 6px rgb(12 34 24 / 0.06), 0 22px 48px -16px rgb(12 34 24 / 0.28);
+  --shadow-paper: 0 1px 2px rgb(12 34 24 / 0.12), 0 12px 30px -10px rgb(12 34 24 / 0.26), 0 30px 60px -26px rgb(12 34 24 / 0.3);
+
+  --animate-shimmer: shimmer 1.8s linear infinite;
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-float-slow: float 9s ease-in-out infinite;
+
+  @keyframes shimmer {
+    from {
+      background-position: 200% 0;
+    }
+    to {
+      background-position: -200% 0;
+    }
+  }
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+}
+
+:root {
+  color-scheme: light;
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f7f8f7;
+  --surface-3: #eceeec;
+  --line: #e8ebe8;
+  --line-strong: #d2d8d3;
+  --ink: #0c2218;
+  --muted: #555f58;
+  --faint: #8b948e;
+  --brand: #0b7a43;
+  --brand-hover: #096a3a;
+  --brand-edge: #064b29;
+  --brand-2: #34b36b;
+  --brand-soft: #eef6f1;
+  --brand-soft-2: #e1efe6;
+  --brand-ink: #ffffff;
+  --ok: #0e8a50;
+  --warn: #b7791f;
+  --bad: #c8372d;
+  --stage: #f1f2f1;
+  --saffron: #ff9933;
+  --saffron-deep: #e06f00;
+  --saffron-soft: #fff3e3;
+  --navy: #000080;
+  --navy-soft: #eceefc;
+}
+
+.dark {
+  color-scheme: dark;
+  --bg: #08120d;
+  --surface: #0e1a14;
+  --surface-2: #14231b;
+  --surface-3: #1d3026;
+  --line: #1f3226;
+  --line-strong: #30493a;
+  --ink: #eaf5ee;
+  --muted: #9bb5a4;
+  --faint: #6b8576;
+  --brand: #3fcf84;
+  --brand-hover: #5ee09b;
+  --brand-edge: #1c7a47;
+  --brand-2: #7be3ae;
+  --brand-soft: #12301f;
+  --brand-soft-2: #194029;
+  --brand-ink: #05140b;
+  --ok: #3fcf84;
+  --warn: #f0b94a;
+  --bad: #ff7468;
+  --stage: #050b08;
+  --saffron: #ffa94d;
+  --saffron-deep: #ffb25e;
+  --saffron-soft: #2a1b08;
+  --navy: #a9b0ff;
+  --navy-soft: #161a3d;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  ::selection {
+    background: color-mix(in srgb, var(--brand) 28%, transparent);
+  }
+  button,
+  [role='button'],
+  summary,
+  select {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
+  :focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
+}
+
+/* ───────── design language: clean, soft and green ───────── */
+
+/* headings use the display sans; <em> inside a heading is the green highlight, not italics */
+@layer components {
+  .font-display {
+    font-weight: 800;
+    letter-spacing: -0.025em;
+  }
+  .font-display em {
+    font-style: normal;
+    color: var(--brand);
+  }
+}
+
+/* A calm green wash behind page headers and the hero */
+.ruled {
+  background-color: var(--bg);
+  background-image: radial-gradient(50% 80% at 90% 0%, color-mix(in srgb, var(--brand) 6%, transparent), transparent 70%);
+}
+
+/* The home page banner: a light mint wash across the full width of the page, fading to white at the bottom */
+.hero-banner {
+  background-color: #f3faf6;
+  background-image: linear-gradient(180deg, #e8f6ee 0%, #f3faf6 55%, #ffffff 100%);
+}
+.dark .hero-banner {
+  background-color: #0b1a13;
+  background-image: linear-gradient(180deg, #11291d 0%, #0b1a13 60%, #08120d 100%);
+}
+
+/* Small green label above headings */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  color: var(--brand);
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+.crop-mark {
+  display: none;
+}
+
+/* A resume card: white paper, soft shadow, lifts on hover */
+.proof {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: var(--shadow-card);
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s,
+    border-color 0.2s;
+}
+.group:hover .proof,
+.proof:hover {
+  transform: translateY(-4px);
+  border-color: color-mix(in srgb, var(--brand) 45%, var(--line));
+  box-shadow: var(--shadow-pop);
+}
+
+/* Dotted stage the PDF sits on */
+.stage {
+  background-color: var(--stage);
+}
+
+.skeleton {
+  background:
+    linear-gradient(100deg, transparent 20%, color-mix(in srgb, var(--ink) 7%, transparent) 50%, transparent 80%),
+    var(--surface-2);
+  background-size: 200% 100%;
+  animation: var(--animate-shimmer);
+}
+
+/* Slim scrollbars */
+.scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--ink) 22%, transparent) transparent;
+}
+.scroll-thin::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.scroll-thin::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--ink) 20%, transparent);
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+.scroll-thin::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--ink) 34%, transparent);
+  background-clip: content-box;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Range input */
+input[type='range'].slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 22px;
+  background: transparent;
+  width: 100%;
+}
+input[type='range'].slider::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(to right, var(--brand) var(--fill, 50%), var(--surface-3) var(--fill, 50%));
+}
+input[type='range'].slider::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--surface-3);
+}
+input[type='range'].slider::-moz-range-progress {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--brand);
+}
+input[type='range'].slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  margin-top: -6px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--brand);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.25);
+  transition: transform 0.12s;
+}
+input[type='range'].slider:active::-webkit-slider-thumb {
+  transform: scale(1.18);
+}
+input[type='range'].slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--brand);
+}
+
+/* ───────── the Made for India page: the tricolour theme, scoped to that page only ───────── */
+.theme-india {
+  --brand: #138808;
+  --brand-hover: #0f6e06;
+  --brand-edge: #0a5204;
+  --brand-2: #ff9933;
+  --brand-soft: #eaf6e7;
+  --brand-soft-2: #d7eed2;
+  --brand-ink: #ffffff;
+}
+.dark .theme-india {
+  --brand: #4cc43a;
+  --brand-hover: #67d655;
+  --brand-edge: #2c8a1e;
+  --brand-soft: #12260f;
+  --brand-soft-2: #1a3714;
+  --brand-ink: #06140a;
+}
+.theme-india .font-display em {
+  color: var(--saffron-deep);
+}
+.theme-india .eyebrow {
+  background: var(--saffron-soft);
+  border-color: color-mix(in srgb, var(--saffron) 45%, transparent);
+  color: var(--saffron-deep);
+}
+
+/* a thin flag: saffron, white and green bands */
+.tricolor-bar {
+  background: linear-gradient(to bottom, #ff9933 0 33.34%, #ffffff 33.34% 66.67%, #138808 66.67% 100%);
+}
+.dark .tricolor-bar {
+  background: linear-gradient(to bottom, #ffa94d 0 33.34%, #f1f1f1 33.34% 66.67%, #4cc43a 66.67% 100%);
+}
+
+/* a lattice (jaali) of diamonds and circles, as carved in screens and windows across India */
+.jaali {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'%3E%3Cg fill='none' stroke='%23ff9933' stroke-opacity='.3' stroke-width='1'%3E%3Cpath d='M28 3 53 28 28 53 3 28Z'/%3E%3Ccircle cx='28' cy='28' r='8'/%3E%3Cpath d='M28 3v50M3 28h50' stroke-opacity='.16'/%3E%3C/g%3E%3C/svg%3E");
+  -webkit-mask-image: linear-gradient(to bottom, #000 30%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 30%, transparent 100%);
+}
+
+/* the logo with a band of light sweeping across it (loading screen) */
+.logo-shine {
+  background-color: var(--brand);
+  background-image: linear-gradient(110deg, transparent 38%, rgb(255 255 255 / 0.85) 50%, transparent 62%);
+  background-size: 300% 100%;
+  background-repeat: no-repeat;
+  background-position: 160% 0;
+  animation: logo-shine 1.5s ease-in-out infinite;
+}
+@keyframes logo-shine {
+  0% {
+    background-position: 160% 0;
+  }
+  70%,
+  100% {
+    background-position: -60% 0;
+  }
+}
+
+/* a soft band of light that drifts across the flag button on hover, like sun on cloth */
+.flag-sheen {
+  background: linear-gradient(105deg, transparent 35%, rgb(255 255 255 / 0.55) 50%, transparent 65%);
+  background-size: 250% 100%;
+  background-position: 160% 0;
+  animation: flag-sheen 2.4s ease-in-out infinite;
+}
+@keyframes flag-sheen {
+  0% {
+    background-position: 160% 0;
+  }
+  60%,
+  100% {
+    background-position: -60% 0;
+  }
+}
+
+/* briefly added by the theme switch so colours cross-fade */
+.theme-anim,
+.theme-anim *,
+.theme-anim *::before,
+.theme-anim *::after {
+  transition:
+    background-color 0.6s ease,
+    color 0.6s ease,
+    border-color 0.6s ease,
+    fill 0.6s ease,
+    stroke 0.6s ease,
+    box-shadow 0.6s ease !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

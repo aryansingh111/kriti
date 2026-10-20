@@ -1,0 +1,15 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["react", "typescript", "oxc"],
+  "rules": {
+    "react/rules-of-hooks": "error",
+    "react/only-export-components": ["warn", { "allowConstantExport": true }]
+  },
+  "overrides": [
+    {
+      // The PDF layer is not hot-reloaded (it also runs in a Web Worker), so shared helpers may live beside components.
+      "files": ["src/pdf/**"],
+      "rules": { "react/only-export-components": "off" }
+    }
+  ]
+}
