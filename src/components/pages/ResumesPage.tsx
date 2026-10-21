@@ -1,4 +1,4 @@
-import { Copy, FilePlus2, LayoutTemplate, MoreHorizontal, PenLine, Trash2 } from 'lucide-react'
+import { ArrowRight, Copy, FilePlus2, HardDrive, LayoutTemplate, MoreHorizontal, PenLine, Shapes, Trash2, type LucideIcon } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { PaperSkeleton } from '@/components/templates/PaperSkeleton'
@@ -25,7 +25,7 @@ function DocCard({ doc, onDelete }: { doc: Doc; onDelete: () => void }) {
     <div className="group relative">
       <Link to={to} className="block w-full text-left">
         <div ref={ref} className="proof relative aspect-[1/1.4142] overflow-hidden">
-          {thumb ? <img src={thumb} alt={`${doc.name} preview`} draggable={false} className="size-full object-cover object-top" /> : <PaperSkeleton />}
+          {thumb ? <img src={thumb} alt={`${doc.name} preview`} width={280} height={396} loading="lazy" decoding="async" draggable={false} className="size-full object-cover object-top" /> : <PaperSkeleton />}
           {doc.isSample && <span className="absolute bottom-2 left-2 rounded-full bg-ink/85 px-2 py-0.5 text-[10.5px] font-bold text-bg">Sample</span>}
         </div>
         <p className="mt-4 truncate text-[14.5px] font-bold text-ink">{doc.name}</p>
@@ -52,6 +52,54 @@ function DocCard({ doc, onDelete }: { doc: Doc; onDelete: () => void }) {
   )
 }
 
+const STEPS: { icon: LucideIcon; title: string; text: string }[] = [
+  { icon: Shapes, title: 'Pick a template', text: 'Choose from 100 designs. Filter by fresher, classic, modern and more.' },
+  { icon: PenLine, title: 'Fill in your details', text: 'Type once and watch the PDF update live. Change colours, fonts and spacing any time.' },
+  { icon: HardDrive, title: 'It saves itself', text: 'Every resume you make is kept in this browser and appears right here. Nothing is uploaded.' },
+]
+
+/** What the page shows before the first resume: where to start, and what to expect once there is one. */
+function Empty() {
+  return (
+    <div>
+      <div className="relative isolate overflow-hidden rounded-3xl border border-line bg-surface-2 px-6 py-14 text-center sm:py-20">
+        <div aria-hidden className="absolute -left-24 -top-28 -z-10 size-72 rounded-full bg-brand/[0.07]" />
+        <div aria-hidden className="absolute -bottom-32 -right-20 -z-10 size-80 rounded-full bg-brand/[0.06]" />
+        <span className="mx-auto grid size-16 place-items-center rounded-2xl border border-line-strong bg-surface text-brand shadow-card">
+          <FilePlus2 className="size-7" />
+        </span>
+        <h2 className="font-display mx-auto mt-6 max-w-xl text-[30px] leading-tight text-ink sm:text-[38px]">Create your first resume in a few minutes.</h2>
+        <p className="mx-auto mt-3 max-w-md text-[15.5px] leading-relaxed text-muted">You have no saved resumes yet. Start with a template and your resume will be waiting here whenever you come back.</p>
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <ButtonLink to={paths.templates()} variant="primary" size="lg" className="!rounded-full px-7">
+            <FilePlus2 className="size-4" /> Create a resume
+          </ButtonLink>
+          <ButtonLink to={paths.templates({ style: 'Fresher' })} size="lg" className="!rounded-full">
+            Fresher templates <ArrowRight className="size-4" />
+          </ButtonLink>
+        </div>
+      </div>
+
+      <ol className="mt-6 grid gap-4 md:grid-cols-3">
+        {STEPS.map((s, i) => (
+          <li key={s.title} className="flex gap-4 rounded-2xl border border-line bg-surface p-5 shadow-card">
+            <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-brand-soft text-brand">
+              <s.icon className="size-5" />
+            </span>
+            <div>
+              <h3 className="text-[15.5px] font-extrabold text-ink">
+                <span className="mr-1.5 text-brand">{i + 1}.</span>
+                {s.title}
+              </h3>
+              <p className="mt-1 text-[14px] leading-snug text-muted">{s.text}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  )
+}
+
 export function ResumesPage() {
   const docs = useStore((s) => s.docs)
   const deleteDoc = useStore((s) => s.deleteDoc)
@@ -60,7 +108,11 @@ export function ResumesPage() {
 
   return (
     <PageFrame>
-      <PageHeader label="My resumes" title={docs.length ? <>Pick up where you <em>left off.</em></> : <>Nothing here yet.</>} sub="Saved privately in this browser. Nothing is uploaded." />
+      <PageHeader label="My resumes" title={docs.length ? <>Pick up where you <em>left off.</em></> : <>Your resumes will <em>live here.</em></>} sub="Saved privately in this browser. Nothing is uploaded.">
+        <Link to={paths.cookies} className="mt-3 inline-block text-[13.5px] font-semibold text-brand underline underline-offset-2">
+          What is saved in my browser?
+        </Link>
+      </PageHeader>
       <section className={`${container} pt-12`}>
         {docs.length ? (
           <div className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
@@ -78,12 +130,7 @@ export function ResumesPage() {
             ))}
           </div>
         ) : (
-          <div className="grid place-items-center rounded-3xl bg-surface-2 px-6 py-24 text-center">
-            <p className="font-display text-[28px] text-ink">Create your first resume in a few minutes.</p>
-            <ButtonLink to={paths.templates()} variant="primary" size="lg" className="mt-6">
-              <FilePlus2 className="size-4" /> Create a resume
-            </ButtonLink>
-          </div>
+          <Empty />
         )}
       </section>
 

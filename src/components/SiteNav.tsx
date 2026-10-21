@@ -1,18 +1,20 @@
-import { FolderOpen, House, LayoutGrid, Menu as MenuIcon, X, type LucideIcon } from 'lucide-react'
+import { FolderOpen, House, LayoutGrid, Menu as MenuIcon, type LucideIcon } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Link, NavLink } from 'react-router'
 import { IndiaFlag } from '@/components/IndiaFlag'
-import { Logo } from '@/components/Logo'
+import { WordMark } from '@/components/Logo'
+import { MobileMenu } from '@/components/MobileMenu'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { Button } from '@/components/ui/Button'
 import { paths } from '@/lib/routes'
 import { cn } from '@/lib/utils'
-import { useStore } from '@/store'
 
 const LINKS: { label: string; to: string; end?: boolean; icon: LucideIcon }[] = [
   { label: 'Home', to: paths.home, end: true, icon: House },
   { label: 'Templates', to: '/templates', icon: LayoutGrid },
+  { label: 'My resumes', to: paths.resumes, icon: FolderOpen },
 ]
 
 /** The Ashoka Chakra: a navy ring, a hub and 24 spokes. */
@@ -33,13 +35,10 @@ function AshokaChakra({ className }: { className?: string }) {
 
 /** Top navigation shared by every public page. */
 export function SiteNav() {
-  const docCount = useStore((s) => s.docs.length)
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  // "My resumes" sits in the same bar as the other pages, right after Templates
-  const links = docCount
-    ? [LINKS[0], LINKS[1], { label: 'My resumes', to: paths.resumes, icon: FolderOpen }, ...LINKS.slice(2)]
-    : LINKS
+  const links = LINKS
+  const close = useCallback(() => setOpen(false), [])
 
   useEffect(() => {
     const on = () => setScrolled(window.scrollY > 6)
@@ -49,26 +48,48 @@ export function SiteNav() {
   }, [])
 
   return (
-    <header className={cn('sticky top-0 z-40 bg-bg/85 backdrop-blur-xl transition-shadow duration-200', scrolled ? 'shadow-[0_6px_24px_-12px_rgb(12_34_24/0.25)]' : 'border-b border-line')}>
-      <div className="mx-auto flex h-[72px] max-w-[1200px] items-center justify-between gap-4 px-4 sm:px-6">
+    <header
+      className={cn(
+        'sticky top-0 z-40 text-ink transition-shadow duration-300',
+        'bg-[linear-gradient(100deg,#dff3e6_0%,#f2fbf6_32%,#e9f7ef_62%,#d3efdd_100%)] dark:bg-[linear-gradient(100deg,#0f2a1c_0%,#10261a_45%,#0d2418_100%)]',
+        scrolled ? 'shadow-[0_12px_28px_-14px_rgb(11_90_50/0.5)]' : 'shadow-[0_1px_0_rgb(11_90_50/0.06)]',
+      )}
+    >
+      {/* soft green light in the corners, a fine dot texture that fades toward the middle, and a bright green line along the bottom edge */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -left-16 -top-24 size-56 rounded-full bg-[#34b36b]/25 blur-3xl dark:bg-[#34b36b]/15" />
+        <div className="absolute -right-20 -top-28 size-64 rounded-full bg-[#7ed9a3]/35 blur-3xl dark:bg-[#1c8a55]/25" />
+        <div
+          className="absolute inset-0 text-[#0b7a43]/[0.16] dark:text-white/[0.06]"
+          style={{
+            backgroundImage: 'radial-gradient(currentColor 1px, transparent 1px)',
+            backgroundSize: '18px 18px',
+            maskImage: 'linear-gradient(to right, #000, transparent 30%, transparent 70%, #000)',
+            WebkitMaskImage: 'linear-gradient(to right, #000, transparent 30%, transparent 70%, #000)',
+          }}
+        />
+        <div className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-[#0b7a43] via-[#34b36b] to-[#b6ecc9] dark:from-[#1c8a55] dark:via-[#3fcf84] dark:to-[#1c8a55]/40" />
+      </div>
+      <div className="relative mx-auto flex h-[72px] max-w-[1200px] items-center justify-between gap-4 px-4 sm:px-6">
         <Link to={paths.home} aria-label="Kriti home" className="shrink-0 rounded-lg">
-          <Logo />
+          <WordMark />
         </Link>
 
-        <nav className="hidden items-center gap-0.5 rounded-full border border-line bg-surface-2 p-1 lg:flex" aria-label="Main">
+        <nav className="hidden items-center gap-0.5 rounded-full border border-white/80 bg-white/65 p-1 shadow-[0_2px_10px_-2px_rgb(11_90_50/0.18),inset_0_1px_0_rgb(255_255_255/0.9)] backdrop-blur dark:border-line dark:bg-surface-2 lg:flex" aria-label="Main">
           {links.map((l) => (
             <NavLink
               key={l.to}
               to={l.to}
               end={l.end}
-              className={({ isActive }) =>
-                cn(
-                  'rounded-full px-4 py-2 text-[14px] font-semibold transition-all',
-                  isActive ? 'bg-surface text-brand shadow-[0_1px_2px_rgb(12_34_24/0.12),0_0_0_1px_var(--line)]' : 'text-muted hover:text-ink',
-                )
-              }
+              className={({ isActive }) => cn('relative rounded-full px-4 py-2 text-[14px] font-semibold transition-colors duration-300', isActive ? 'text-white dark:text-[#06301d]' : 'text-muted hover:text-brand')}
             >
-              {l.label}
+              {({ isActive }) => (
+                <>
+                  {/* one green pill that glides to whichever link is current */}
+                  {isActive && <motion.span layoutId="nav-pill" aria-hidden className="absolute inset-0 rounded-full bg-gradient-to-b from-[#1f9a5c] to-[#0b7a43] shadow-[0_6px_14px_-4px_rgb(11_122_67/0.7),inset_0_1px_0_rgb(255_255_255/0.25)] dark:from-[#3fcf84] dark:to-[#2fb872]" transition={{ type: 'spring', stiffness: 380, damping: 32 }} />}
+                  <span className="relative">{l.label}</span>
+                </>
+              )}
             </NavLink>
           ))}
         </nav>
@@ -81,7 +102,7 @@ export function SiteNav() {
               cn(
                 'group relative hidden h-10 items-center gap-2 overflow-hidden whitespace-nowrap rounded-full border py-1 pl-1 pr-4 text-[13.5px] font-semibold transition-all duration-500 md:inline-flex',
                 'hover:-translate-y-px hover:rounded-md hover:border-transparent hover:shadow-[0_10px_22px_-8px_rgba(19,136,8,0.6)]',
-                isActive ? 'border-brand/40 bg-brand-soft text-brand' : 'border-line bg-surface text-ink',
+                isActive ? 'border-brand/40 bg-white text-brand dark:bg-brand-soft' : 'border-[#cfe6d8] bg-white/80 text-ink dark:border-line dark:bg-surface-2',
               )
             }
           >
@@ -94,41 +115,15 @@ export function SiteNav() {
             <IndiaFlag className="relative transition-opacity duration-300 group-hover:opacity-0" />
             <span className="relative transition-opacity duration-300 group-hover:opacity-0">Made for India</span>
           </NavLink>
-          <ThemeToggle />
-          <Button variant="ghost" size="icon" className="lg:hidden" aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open} onClick={() => setOpen((o) => !o)}>
-            {open ? <X className="size-5" /> : <MenuIcon className="size-5" />}
+          <ThemeToggle className="!border-[#cfe6d8] !bg-white/80 hover:!bg-white dark:!border-line dark:!bg-surface-2" />
+          <Button variant="ghost" size="icon" className="lg:hidden" aria-label="Open menu" aria-haspopup="dialog" aria-expanded={open} onClick={() => setOpen(true)}>
+            <MenuIcon className="size-5" />
           </Button>
         </div>
       </div>
 
-      <AnimatePresence>
-        {open && (
-          <motion.nav initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden border-t border-line bg-bg lg:hidden" aria-label="Mobile">
-            <div className="mx-auto flex max-w-[1200px] flex-col gap-1 p-3">
-              {links.map((l) => (
-                <NavLink
-                  key={l.to}
-                  to={l.to}
-                  end={l.end}
-                  onClick={() => setOpen(false)}
-                  className={({ isActive }) => cn('flex items-center gap-3 rounded-xl px-4 py-3 text-[15px] font-semibold', isActive ? 'bg-brand-soft text-brand' : 'text-ink hover:bg-surface-2')}
-                >
-                  <l.icon className="size-[18px]" />
-                  {l.label}
-                </NavLink>
-              ))}
-              <NavLink
-                to={paths.india}
-                onClick={() => setOpen(false)}
-                className={({ isActive }) => cn('flex items-center gap-3 rounded-xl px-4 py-3 text-[15px] font-semibold', isActive ? 'bg-brand-soft text-brand' : 'text-ink hover:bg-surface-2')}
-              >
-                <IndiaFlag className="size-[22px]" />
-                Made for India
-              </NavLink>
-            </div>
-          </motion.nav>
-        )}
-      </AnimatePresence>
+      {/* in a portal: the header's blur would otherwise make "full screen" mean "header sized" */}
+      {createPortal(<AnimatePresence>{open && <MobileMenu links={links} onClose={close} />}</AnimatePresence>, document.body)}
     </header>
   )
 }

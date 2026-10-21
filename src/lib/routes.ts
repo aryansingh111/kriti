@@ -6,10 +6,16 @@ export type Rail = (typeof RAILS)[number]
 
 export const isRail = (v: string | undefined): v is Rail => !!v && (RAILS as readonly string[]).includes(v)
 
+/** Whether a page is drawn under the site header: everything except the editor, the template switcher and the review page, which have their own bars. */
+export const showsSiteNav = (pathname: string) => !/^\/resumes\/[^/]+\/(edit|templates|review)(\/|$)/.test(pathname)
+
 export const paths = {
   home: '/',
   india: '/made-for-india',
   resumes: '/resumes',
+  privacy: '/privacy',
+  terms: '/terms',
+  cookies: '/cookies',
   /** the page for reporting a bug or asking for a feature */
   feedback: (kind?: 'bug' | 'feature') => (kind ? `/feedback?type=${kind}` : '/feedback'),
   /** the gallery for starting a new resume; `style` and `q` become query parameters */

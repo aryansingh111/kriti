@@ -4,7 +4,6 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 import { SiteFooter } from '@/components/SiteFooter'
-import { SiteNav } from '@/components/SiteNav'
 import { Button, ButtonLink } from '@/components/ui/Button'
 import { filterTemplates, NO_FILTERS } from '@/lib/templateFilter'
 import { paths } from '@/lib/routes'
@@ -76,8 +75,7 @@ export function OtherTemplatesPage() {
   }
 
   return (
-    <div className="min-h-dvh bg-bg">
-      <SiteNav />
+    <div className="min-h-[calc(100dvh-72px)] bg-bg">
       <div className="mx-auto max-w-[1200px] px-4 pb-24 pt-8 sm:px-6">
         <ButtonLink to={paths.resumes} variant="ghost" size="sm" className="-ml-2 mb-4">
           <ArrowLeft className="size-4" /> My resumes

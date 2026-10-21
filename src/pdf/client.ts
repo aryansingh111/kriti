@@ -132,8 +132,3 @@ export function renderResume(data: ResumeData, settings: Settings, opts: RenderO
     pump()
   })
 }
-
-/** Warm up the worker (and its fonts) before the first real render. */
-export function warmUp() {
-  spawnWorker()
-}

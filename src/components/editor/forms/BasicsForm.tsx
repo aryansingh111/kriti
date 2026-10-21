@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button'
 import { Field, TextArea, TextInput } from '@/components/ui/Field'
 import { guessLinkKind, LINK_BY_KIND, LINK_META } from '@/lib/links'
 import { displayUrl, initials } from '@/lib/resume'
+import { paths } from '@/lib/routes'
 import { cn, readSquarePhoto } from '@/lib/utils'
 import { specFor } from '@/pdf/specs'
 import { useStore } from '@/store'
@@ -57,7 +58,7 @@ function PhotoField() {
         className="group relative size-16 shrink-0 overflow-hidden rounded-full ring-2 ring-line transition hover:ring-brand"
       >
         {photo ? (
-          <img src={photo} alt="Your photo" className="size-full object-cover" />
+          <img src={photo} alt="Your profile photo" decoding="async" className="size-full object-cover" />
         ) : (
           <span className="grid size-full place-items-center bg-brand text-lg font-bold text-white">
             {name.trim() ? initials(name) : <UserRound className="size-6" />}
@@ -83,7 +84,14 @@ function PhotoField() {
             ? `${spec.name} doesn’t show a photo – switch to a template with the camera icon to use one.`
             : !showPhoto
               ? 'Photo is switched off in Design.'
-              : 'Drop an image here. It’s cropped square and stays on your device.'}
+              : (
+                  <>
+                    Drop an image here. It’s cropped square and stays on your device.{' '}
+                    <a href={paths.privacy} target="_blank" rel="noreferrer" className="font-semibold text-brand underline underline-offset-2">
+                      Privacy
+                    </a>
+                  </>
+                )}
         </p>
       </div>
       <input ref={input} type="file" accept="image/*" hidden onChange={(e) => void take(e.target.files?.[0])} />

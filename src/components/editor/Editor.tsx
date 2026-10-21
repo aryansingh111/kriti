@@ -11,6 +11,7 @@ import { ContentPanel } from './panels/ContentPanel'
 import { DesignPanel } from './panels/DesignPanel'
 import { SectionsPanel } from './panels/SectionsPanel'
 import { TemplatesPanel } from './panels/TemplatesPanel'
+import { PreviewHint } from './PreviewHint'
 import { Rail } from './Rail'
 import { TopBar } from './TopBar'
 
@@ -89,6 +90,7 @@ export default function Editor({ rail }: { rail: RailId }) {
           <PdfStage interactive />
         </main>
       </div>
+      <PreviewHint />
     </div>
   )
 }

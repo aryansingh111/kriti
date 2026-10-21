@@ -1,7 +1,10 @@
-import { ArrowRight, Check, Download, FilePlus2, Layers, PenLine, Quote, Sparkles } from 'lucide-react'
+import { ArrowRight, Check, Download, FilePlus2, Layers, LayoutGrid, PenLine, Quote, Sparkles } from 'lucide-react'
 import { AnimatePresence, motion, useMotionValue, useSpring, useTransform, type MotionStyle, type MotionValue } from 'motion/react'
 import { useMemo, useState } from 'react'
+import banners from 'virtual:banners'
 import { useNavigate } from 'react-router'
+import { BannerCarousel } from '@/components/home/BannerCarousel'
+import { Faq } from '@/components/home/Faq'
 import { CtaBand } from '@/components/pages/CtaBand'
 import { container, PageFrame, SectionHead } from '@/components/pages/parts'
 import { TemplateImage } from '@/components/templates/TemplateImage'
@@ -143,17 +146,26 @@ function Belief() {
 
 /** Tiny drawings that sit at the top of each step card. */
 function ArtPick() {
+  /** Three little drawn sheets in different layouts (plain shapes, so this card costs no template renders). */
   const sheets = [
-    { id: 'harvard', rotate: -12, x: -64, y: 10, z: 1 },
-    { id: 'summit', rotate: 0, x: 0, y: -4, z: 3 },
-    { id: 'meridian', rotate: 12, x: 64, y: 10, z: 1 },
-  ]
+    { rotate: -12, x: -64, y: 10, z: 1, kind: 'serif' },
+    { rotate: 0, x: 0, y: -4, z: 3, kind: 'band' },
+    { rotate: 12, x: 64, y: 10, z: 1, kind: 'side' },
+  ] as const
   return (
     <div className="relative h-full w-full">
       {sheets.map((s) => (
-        <div key={s.id} className="absolute left-1/2 top-1/2 w-[92px] transition-transform duration-500 group-hover:scale-105" style={{ transform: `translate(calc(-50% + ${s.x}px), calc(-50% + ${s.y}px)) rotate(${s.rotate}deg)`, zIndex: s.z }}>
-          <div className="proof overflow-hidden !rounded-lg !shadow-[0_14px_26px_-12px_rgba(12,34,24,0.45)]">
-            <TemplateImage id={s.id} width={130} eager />
+        <div key={s.kind} className="absolute left-1/2 top-1/2 w-[92px] transition-transform duration-500 group-hover:scale-105" style={{ transform: `translate(calc(-50% + ${s.x}px), calc(-50% + ${s.y}px)) rotate(${s.rotate}deg)`, zIndex: s.z }}>
+          <div className="relative aspect-[1/1.4142] overflow-hidden rounded-lg border border-line bg-white p-2 shadow-[0_14px_26px_-12px_rgba(12,34,24,0.45)]">
+            {s.kind === 'band' && <i className="absolute inset-x-0 top-0 block h-[26%] bg-brand" />}
+            {s.kind === 'side' && <i className="absolute inset-y-0 left-0 block w-[30%] bg-[#1e293b]" />}
+            <div className={s.kind === 'side' ? 'ml-[34%]' : s.kind === 'band' ? 'pt-[22%]' : 'text-center'}>
+              <i className={`mb-1.5 block h-1.5 rounded-full ${s.kind === 'serif' ? 'mx-auto w-10 bg-ink/80' : 'w-10 bg-ink/80'}`} />
+              {s.kind === 'serif' && <i className="mx-auto mb-2 block h-px w-14 bg-ink/40" />}
+              {[100, 86, 94, 70, 90, 62, 80].map((w, i) => (
+                <i key={i} className={`mb-1 block h-[3px] rounded-full ${i === 2 || i === 5 ? 'mt-2 bg-brand/60' : 'bg-line-strong'} ${s.kind === 'serif' ? 'mx-auto' : ''}`} style={{ width: `${w}%` }} />
+              ))}
+            </div>
           </div>
         </div>
       ))}
@@ -344,6 +356,11 @@ function Popular() {
           </ButtonLink>
         </div>
 
+        {/* on phones the way into the whole gallery comes first, as a full-width button */}
+        <ButtonLink to={paths.templates()} variant="primary" size="lg" className="mt-5 w-full !rounded-full shadow-card lg:hidden">
+          <LayoutGrid className="size-4" /> Browse all {SPECS.length} templates <ArrowRight className="size-4" />
+        </ButtonLink>
+
         {/* who is it for */}
         <div role="tablist" aria-label="Who is the resume for" className="no-scrollbar -mx-4 mt-6 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0">
           {TABS.map((x) => {
@@ -395,9 +412,6 @@ function Popular() {
             <Button variant="primary" size="sm" className="!rounded-full" onClick={() => use(best.id)}>
               Start with {best.name} <ArrowRight className="size-3.5" />
             </Button>
-            <ButtonLink to={paths.templates()} variant="secondary" size="sm" className="!rounded-full lg:hidden">
-              Browse all {SPECS.length}
-            </ButtonLink>
           </div>
         </div>
       </div>
@@ -408,10 +422,11 @@ function Popular() {
 export function Home() {
   return (
     <PageFrame>
-      <Hero />
+      {banners.length ? <BannerCarousel banners={banners} /> : <Hero />}
       <Belief />
       <Steps />
       <Popular />
+      <Faq />
       <CtaBand />
     </PageFrame>
   )

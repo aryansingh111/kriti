@@ -12,7 +12,7 @@ import {
   ZoomIn,
   ZoomOut,
 } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import { useDownload } from '@/lib/download'
 import { fitToOnePage } from '@/lib/fit'
@@ -26,7 +26,11 @@ import { BlockOverlay } from './BlockOverlay'
 import { PdfPage } from './PdfPage'
 import { getPreviewBlob, setPreviewBlob } from './previewBlob'
 
-const ZOOM_STEPS = [0.5, 0.65, 0.8, 0.9, 1, 1.15, 1.3, 1.5, 1.75, 2]
+const ZOOM_STEPS = [0.5, 0.65, 0.8, 0.9, 1, 1.15, 1.3, 1.5, 1.75, 2, 2.5, 3]
+const ZOOM_MIN = ZOOM_STEPS[0]
+const ZOOM_MAX = ZOOM_STEPS[ZOOM_STEPS.length - 1]
+/** A double tap on a phone jumps to this zoom (and back to fit width). */
+const TAP_ZOOM = 2.2
 const GAP = 28
 
 interface Props {
@@ -108,7 +112,9 @@ export function PdfStage({ interactive = false, toolbar = true, maxWidth = 860, 
 
   const dims = PAGE_DIMENSIONS[settings.pageSize]
   const aspect = dims.h / dims.w
-  const fit = clamp(box.w - 48, 260, maxWidth)
+  // phones give the page nearly the whole width, so more of the text is legible before any zooming
+  const gutter = box.w < 640 ? 16 : 48
+  const fit = clamp(box.w - gutter, 260, maxWidth)
   const pageW = Math.round(fit * zoom)
   const pageH = pageW * aspect
   const k = pageW / dims.w
@@ -132,6 +138,99 @@ export function PdfStage({ interactive = false, toolbar = true, maxWidth = 860, 
       const i = ZOOM_STEPS.findIndex((s) => s >= z - 0.001)
       return ZOOM_STEPS[clamp((i < 0 ? ZOOM_STEPS.length - 1 : i) + dir, 0, ZOOM_STEPS.length - 1)]
     })
+
+  /* ── touch: pinch to zoom, double-tap to zoom in or back to fit ── */
+  const content = useRef<HTMLDivElement>(null)
+  const zoomNow = useRef(zoom)
+  const keepPoint = useRef<{ fx: number; fy: number; vx: number; vy: number; r: number } | null>(null)
+  useEffect(() => {
+    zoomNow.current = zoom
+  }, [zoom])
+
+  // after a pinch or double tap changes the zoom, scroll so the point under the fingers stays under them
+  useLayoutEffect(() => {
+    const keep = keepPoint.current
+    const el = scroller.current
+    if (!keep || !el) return
+    keepPoint.current = null
+    el.scrollTo({ left: keep.fx * keep.r - keep.vx, top: keep.fy * keep.r - keep.vy })
+  }, [zoom])
+
+  useEffect(() => {
+    const el = scroller.current
+    if (!el) return
+    type Pinch = { d0: number; z0: number; vx: number; vy: number; fx: number; fy: number; s: number }
+    let pinch: Pinch | null = null
+    let tap: { x: number; y: number; t: number } | null = null
+    let lastTap: { x: number; y: number; t: number } | null = null
+
+    const spread = (t: TouchList) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY)
+    const point = (cx: number, cy: number) => {
+      const r = el.getBoundingClientRect()
+      return { vx: cx - r.left, vy: cy - r.top, fx: el.scrollLeft + cx - r.left, fy: el.scrollTop + cy - r.top }
+    }
+    const zoomTo = (z: number, at: ReturnType<typeof point>) => {
+      const next = clamp(z, ZOOM_MIN, ZOOM_MAX)
+      keepPoint.current = { fx: at.fx, fy: at.fy, vx: at.vx, vy: at.vy, r: next / zoomNow.current }
+      setZoom(next)
+    }
+
+    // taps on controls are not zoom taps (the draggable blocks of the preview are buttons too, and do count)
+    const skipTap = (t: HTMLElement) => !!t.closest('[role=toolbar]') || (!!t.closest('button,a,input,textarea,select') && !t.closest('[data-block]'))
+    const onStart = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        tap = null
+        const at = point((e.touches[0].clientX + e.touches[1].clientX) / 2, (e.touches[0].clientY + e.touches[1].clientY) / 2)
+        pinch = { d0: spread(e.touches), z0: zoomNow.current, s: 1, ...at }
+      } else if (e.touches.length === 1 && !skipTap(e.target as HTMLElement)) {
+        tap = { x: e.touches[0].clientX, y: e.touches[0].clientY, t: Date.now() }
+      } else tap = null
+    }
+    const onMove = (e: TouchEvent) => {
+      if (tap && Math.hypot(e.touches[0].clientX - tap.x, e.touches[0].clientY - tap.y) > 10) tap = null
+      if (!pinch || e.touches.length !== 2 || !content.current) return
+      e.preventDefault()
+      // while the fingers move the page is only scaled, which is smooth; the sharp re-render happens when they lift
+      const z = clamp((pinch.z0 * spread(e.touches)) / pinch.d0, ZOOM_MIN, ZOOM_MAX)
+      pinch.s = z / pinch.z0
+      content.current.style.transformOrigin = `${pinch.fx}px ${pinch.fy}px`
+      content.current.style.transform = `scale(${pinch.s})`
+    }
+    const onEnd = (e: TouchEvent) => {
+      if (pinch && e.touches.length < 2) {
+        const p = pinch
+        pinch = null
+        if (content.current) {
+          content.current.style.transform = ''
+          content.current.style.transformOrigin = ''
+        }
+        if (Math.abs(p.s - 1) > 0.01) zoomTo(p.z0 * p.s, p)
+        return
+      }
+      if (!tap || e.changedTouches.length !== 1) return
+      const now = Date.now()
+      const up = tap
+      tap = null
+      if (now - up.t > 260) return
+      if (lastTap && now - lastTap.t < 320 && Math.hypot(up.x - lastTap.x, up.y - lastTap.y) < 32) {
+        lastTap = null
+        // the taps selected a section (after the touch ends, so clear it a moment later); zooming is about reading, not its toolbar
+        window.setTimeout(() => useStore.getState().select(null), 350)
+        zoomTo(zoomNow.current > 1.2 ? 1 : TAP_ZOOM, point(up.x, up.y))
+      } else lastTap = { x: up.x, y: up.y, t: now }
+    }
+
+    el.addEventListener('touchstart', onStart, { passive: true })
+    el.addEventListener('touchmove', onMove, { passive: false })
+    el.addEventListener('touchend', onEnd, { passive: true })
+    el.addEventListener('touchcancel', onEnd, { passive: true })
+    return () => {
+      el.removeEventListener('touchstart', onStart)
+      el.removeEventListener('touchmove', onMove)
+      el.removeEventListener('touchend', onEnd)
+      el.removeEventListener('touchcancel', onEnd)
+    }
+  }, [])
 
   const openInTab = () => {
     const blob = getPreviewBlob()
@@ -169,9 +268,11 @@ export function PdfStage({ interactive = false, toolbar = true, maxWidth = 860, 
         onPointerDown={(e) => {
           if (interactive && !(e.target as HTMLElement).closest('[data-block],[role=toolbar]')) select(null)
         }}
-        className="scroll-thin min-h-0 flex-1 overflow-auto"
+        // the page scrolls both ways; pinching is handled above so the browser does not zoom the whole site
+        style={{ touchAction: 'pan-x pan-y' }}
+        className="scroll-thin min-h-0 flex-1 overflow-auto overscroll-contain"
       >
-        <div className="mx-auto flex flex-col items-center px-6 pb-36 pt-9" style={{ width: Math.max(pageW + 48, box.w), gap: GAP }}>
+        <div ref={content} className="mx-auto flex flex-col items-center px-2 pb-36 pt-6 sm:px-6 sm:pt-9" style={{ width: Math.max(pageW + gutter, box.w), gap: GAP }}>
           {view ? (
             Array.from({ length: pages }).map((_, i) => (
               <PdfPage key={i} doc={view.doc} pageNumber={i + 1} width={pageW} aspect={aspect} total={pages}>
@@ -244,7 +345,7 @@ export function PdfStage({ interactive = false, toolbar = true, maxWidth = 860, 
       {toolbar && (
         <div className="pointer-events-none absolute inset-x-0 bottom-5 z-20 flex justify-center px-3 max-lg:bottom-[4.75rem]">
           <div className="pointer-events-auto flex items-center gap-0.5 rounded-xl border border-line bg-surface p-1 shadow-pop">
-            <Button variant="ghost" size="icon" onClick={() => zoomBy(-1)} aria-label="Zoom out" title="Zoom out" disabled={zoom <= ZOOM_STEPS[0]}>
+            <Button variant="ghost" size="icon" onClick={() => zoomBy(-1)} aria-label="Zoom out" title="Zoom out" disabled={zoom <= ZOOM_MIN}>
               <ZoomOut className="size-4" />
             </Button>
             <button
@@ -255,24 +356,26 @@ export function PdfStage({ interactive = false, toolbar = true, maxWidth = 860, 
             >
               {Math.round(zoom * 100)}%
             </button>
-            <Button variant="ghost" size="icon" onClick={() => zoomBy(1)} aria-label="Zoom in" title="Zoom in" disabled={zoom >= ZOOM_STEPS[ZOOM_STEPS.length - 1]}>
+            <Button variant="ghost" size="icon" onClick={() => zoomBy(1)} aria-label="Zoom in" title="Zoom in" disabled={zoom >= ZOOM_MAX}>
               <ZoomIn className="size-4" />
             </Button>
-            <Button variant="ghost" size="icon" onClick={() => setZoom(1)} aria-label="Fit to width" title="Fit to width">
+            <Button variant="ghost" size="icon" className="max-sm:hidden" onClick={() => setZoom(1)} aria-label="Fit to width" title="Fit to width">
               <Maximize2 className="size-4" />
             </Button>
 
-            <span className="mx-1 h-5 w-px bg-line" />
-
-            <Button variant="ghost" size="icon" onClick={() => goTo(current - 1)} disabled={current <= 1} aria-label="Previous page">
-              <ChevronLeft className="size-4" />
-            </Button>
-            <span className="min-w-[3.2rem] text-center font-mono text-xs tabular-nums text-muted">
-              {current} / {pages}
-            </span>
-            <Button variant="ghost" size="icon" onClick={() => goTo(current + 1)} disabled={current >= pages} aria-label="Next page">
-              <ChevronRight className="size-4" />
-            </Button>
+            {/* a one-page resume has nothing to page through, so phones skip this part */}
+            <div className={cn('items-center gap-0.5', pages > 1 ? 'flex' : 'flex max-sm:hidden')}>
+              <span className="mx-1 h-5 w-px bg-line" />
+              <Button variant="ghost" size="icon" onClick={() => goTo(current - 1)} disabled={current <= 1} aria-label="Previous page">
+                <ChevronLeft className="size-4" />
+              </Button>
+              <span className="min-w-[3.2rem] text-center font-mono text-xs tabular-nums text-muted">
+                {current} / {pages}
+              </span>
+              <Button variant="ghost" size="icon" onClick={() => goTo(current + 1)} disabled={current >= pages} aria-label="Next page">
+                <ChevronRight className="size-4" />
+              </Button>
+            </div>
 
             {interactive && (
               <>

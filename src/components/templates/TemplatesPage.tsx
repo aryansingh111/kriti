@@ -3,7 +3,6 @@ import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router'
 import { SiteFooter } from '@/components/SiteFooter'
-import { SiteNav } from '@/components/SiteNav'
 import { Button, ButtonLink } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import { COLOUR_FAMILIES, countBy, FEATURES, filterTemplates, LAYOUTS, layoutOf, NO_FILTERS, type ColourFamily, type Filters, type Layout, type Sort } from '@/lib/templateFilter'
@@ -44,7 +43,7 @@ function Check_({ checked, onChange, children, count }: { checked: boolean; onCh
 function FilterBlock({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="border-b border-line py-4 first:pt-0 last:border-0">
-      <h3 className="mb-2 px-1.5 text-[11.5px] font-bold uppercase tracking-[0.14em] text-faint">{title}</h3>
+      <h2 className="mb-2 px-1.5 text-[11.5px] font-bold uppercase tracking-[0.14em] text-faint">{title}</h2>
       {children}
     </div>
   )
@@ -379,10 +378,8 @@ export function TemplatesPage({ mode }: { mode: 'new' | 'switch' }) {
   }
 
   return (
-    <div className="min-h-dvh bg-bg">
-      {mode === 'new' ? (
-        <SiteNav />
-      ) : (
+    <div className={mode === 'new' ? 'min-h-[calc(100dvh-72px)] bg-bg' : 'min-h-dvh bg-bg'}>
+      {mode === 'switch' && (
         <header className="sticky top-0 z-40 flex h-16 items-center gap-3 border-b border-line-strong bg-bg/90 px-4 backdrop-blur-xl sm:px-6">
           <ButtonLink to={paths.edit(docId, 'templates')} variant="secondary">
             <ArrowLeft className="size-4" /> Back to editor
@@ -457,6 +454,7 @@ export function TemplatesPage({ mode }: { mode: 'new' | 'switch' }) {
           </aside>
 
           <section className="min-w-0 flex-1" aria-live="polite">
+            <h2 className="sr-only">Resume templates</h2>
             <div className="mb-5 flex items-center justify-between text-[13.5px] text-muted">
               <span>
                 <b className="text-ink">{list.length}</b> template{list.length === 1 ? '' : 's'}

@@ -3,6 +3,7 @@ import { useMyTemplateThumb, useTemplateThumb } from '@/lib/thumbs'
 import type { ResumeData } from '@/types'
 import { cn } from '@/lib/utils'
 import { EMPTY_DATA } from '@/lib/defaults'
+import { specFor } from '@/pdf/specs'
 import { PaperSkeleton } from './PaperSkeleton'
 
 /** The live render of a template (page 1, with its own sample resume). Renders lazily once scrolled near. */
@@ -30,7 +31,16 @@ export function TemplateImage({
   const url = mine ? own : sample
   return (
     <div ref={ref} className={cn('relative aspect-[1/1.4142] overflow-hidden bg-white', className)}>
-      {url ? <img src={url} alt={alt ?? `${id} resume template preview`} draggable={false} className="size-full object-cover object-top" /> : <PaperSkeleton />}
+      {url ? <img
+          src={url}
+          alt={alt ?? `${specFor(id).name} resume template preview`}
+          width={width}
+          height={Math.round(width * 1.4142)}
+          loading="lazy"
+          decoding="async"
+          draggable={false}
+          className="size-full object-cover object-top"
+        /> : <PaperSkeleton />}
     </div>
   )
 }

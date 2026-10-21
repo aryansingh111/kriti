@@ -5,11 +5,14 @@ import { Toaster } from 'sonner'
 import { Home } from '@/components/home/Home'
 import { LogoLoader } from '@/components/LogoLoader'
 import { FeedbackPage } from '@/components/pages/FeedbackPage'
+import { CookiesPage, PrivacyPage, TermsPage } from '@/components/pages/legal/PolicyPages'
 import { NotFound } from '@/components/pages/NotFound'
 import { ResumesPage } from '@/components/pages/ResumesPage'
-import { isRail, paths } from '@/lib/routes'
+import { BackToTop } from '@/components/BackToTop'
+import { SiteNav } from '@/components/SiteNav'
+import { isRail, paths, showsSiteNav } from '@/lib/routes'
 import { useTheme } from '@/lib/theme'
-import { warmUp } from '@/pdf/client'
+import { useSeo } from '@/seo/useSeo'
 import { useStore } from '@/store'
 
 const Editor = lazy(() => import('@/components/editor/Editor'))
@@ -33,6 +36,7 @@ function RouteFlash() {
 /** Fades each page in and returns to the top when the page (not just the editor panel) changes. */
 function Shell() {
   const { pathname } = useLocation()
+  useSeo()
   const pageKey = pathname.replace(/\/edit\/[^/]+$/, '/edit')
   // flash the logo on every page change, but not on first load (a full reload already shows the splash from index.html)
   const [seenKey, setSeenKey] = useState(pageKey)
@@ -47,12 +51,17 @@ function Shell() {
   }, [pageKey])
 
   return (
-    <motion.div key={pageKey} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.16 }}>
-      <Suspense fallback={<Loading />}>
-        <Outlet />
-      </Suspense>
-      {flashKey && <RouteFlash key={flashKey} />}
-    </motion.div>
+    <>
+      {/* the header lives here, outside the page that fades, so it stays put and its pill can slide between pages */}
+      {showsSiteNav(pathname) && <SiteNav />}
+      {showsSiteNav(pathname) && <BackToTop />}
+      <motion.div key={pageKey} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.16 }}>
+        <Suspense fallback={<Loading />}>
+          <Outlet />
+        </Suspense>
+        {flashKey && <RouteFlash key={flashKey} />}
+      </motion.div>
+    </>
   )
 }
 
@@ -88,10 +97,6 @@ function EditPanel() {
 export default function App() {
   const { dark } = useTheme()
 
-  useEffect(() => {
-    warmUp()
-  }, [])
-
   return (
     <>
       <Routes>
@@ -100,6 +105,9 @@ export default function App() {
           <Route path="templates" element={<TemplatesPage mode="new" />} />
           <Route path="made-for-india" element={<IndiaPage />} />
           <Route path="feedback" element={<FeedbackPage />} />
+          <Route path="privacy" element={<PrivacyPage />} />
+          <Route path="terms" element={<TermsPage />} />
+          <Route path="cookies" element={<CookiesPage />} />
           <Route path="resumes" element={<ResumesPage />} />
           <Route path="resumes/:id" element={<ResumeRoute />}>
             <Route index element={<EditIndex />} />

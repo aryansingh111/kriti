@@ -1,15 +1,13 @@
 import type { ReactNode } from 'react'
 import { SiteFooter } from '@/components/SiteFooter'
-import { SiteNav } from '@/components/SiteNav'
 import { cn } from '@/lib/utils'
 
 export const container = 'mx-auto max-w-[1200px] px-4 sm:px-6'
 
-/** Nav + content + footer: the frame of every public page. */
+/** Content + footer: the frame of every public page (the site header is drawn once by the app shell). */
 export function PageFrame({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-dvh bg-bg">
-      <SiteNav />
+    <div className="min-h-[calc(100dvh-72px)] bg-bg">
       <main>{children}</main>
       <SiteFooter />
     </div>

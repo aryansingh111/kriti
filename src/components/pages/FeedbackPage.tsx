@@ -1,11 +1,12 @@
 import { ArrowRight, Bug, Check, Copy, Lightbulb, Mail, RotateCcw, ShieldCheck } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useState, type FormEvent } from 'react'
-import { useSearchParams } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/Button'
 import { Field, inputCls, TextArea, TextInput } from '@/components/ui/Field'
 import { FEEDBACK_EMAIL, mailtoHref, reportBody, WHERE_OPTIONS, type FeedbackKind, type FeedbackReport } from '@/lib/feedback'
+import { paths } from '@/lib/routes'
 import { cn } from '@/lib/utils'
 import { container, PageFrame } from './parts'
 
@@ -102,7 +103,7 @@ export function FeedbackPage() {
           <div className="flex gap-3 rounded-2xl border border-line p-5">
             <ShieldCheck className="mt-0.5 size-6 shrink-0 text-brand" />
             <p className="text-[14px] leading-relaxed text-muted">
-              <b className="font-extrabold text-ink">Your resume stays private.</b> Nothing from your resume is attached. You can see exactly what is sent before you send it.
+              <b className="font-extrabold text-ink">Your resume stays private.</b> Nothing from your resume is attached. You can see exactly what is sent before you send it. <Link to={paths.privacy} className="font-semibold text-brand underline underline-offset-2">Privacy Policy</Link>
             </p>
           </div>
         </aside>
