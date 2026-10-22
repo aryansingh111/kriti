@@ -98,7 +98,7 @@ export const PAGES: PageSeo[] = [
   {
     path: '/privacy',
     title: 'Privacy Policy | Kriti Studio',
-    description: 'How Kriti Studio handles your information: your resume stays on your device, there are no accounts, no ads and no tracking.',
+    description: 'How Kriti Studio handles your information: your resume stays on your device, with no accounts, no ads and only cookie-free visit counts.',
     h1: 'Privacy Policy',
     intro: 'Kriti Studio works inside your browser. Your resume is yours, and we never receive it.',
     crumb: 'Privacy Policy',
@@ -193,7 +193,7 @@ export const FAQS: Faq[] = [
   },
   {
     q: 'Is my personal data safe?',
-    a: 'Your resume never leaves your device. Everything, including the PDF, is made inside your browser, and your resumes are saved only in your browser storage. There are no ads and no tracking. Because of this we cannot read or recover your resumes, so use Export data to keep a backup file.',
+    a: 'Your resume never leaves your device. Everything, including the PDF, is made inside your browser, and your resumes are saved only in your browser storage. There are no ads, and visits are counted with cookie-free analytics that never see your resume. Because of this we cannot read or recover your resumes, so use Export data to keep a backup file.',
   },
   {
     q: 'Are the templates ATS-friendly?',

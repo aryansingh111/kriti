@@ -1,3 +1,4 @@
+import { Analytics } from '@vercel/analytics/react'
 import { AnimatePresence, motion } from 'motion/react'
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { Navigate, Outlet, Route, Routes, useLocation, useParams } from 'react-router'
@@ -10,6 +11,7 @@ import { NotFound } from '@/components/pages/NotFound'
 import { ResumesPage } from '@/components/pages/ResumesPage'
 import { BackToTop } from '@/components/BackToTop'
 import { SiteNav } from '@/components/SiteNav'
+import { scrubAnalytics } from '@/lib/analytics'
 import { isRail, paths, showsSiteNav } from '@/lib/routes'
 import { useTheme } from '@/lib/theme'
 import { useSeo } from '@/seo/useSeo'
@@ -120,6 +122,8 @@ export default function App() {
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
+      {/* Vercel Web Analytics: cookie-free page-view counts (see the Privacy Policy) */}
+      <Analytics beforeSend={scrubAnalytics} />
       <Toaster position="bottom-center" theme={dark ? 'dark' : 'light'} toastOptions={{ style: { borderRadius: 6, fontFamily: 'var(--font-sans)' } }} />
     </>
   )

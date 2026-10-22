@@ -55,6 +55,10 @@ Modern, simple and green on white: soft rounded cards, a friendly sans-serif (Pl
 - Multiple resumes, undo/redo, autosave, JSON export/import, light/dark, mobile layout.
 - Indic scripts and ₹ render via Noto/Anek fallback fonts.
 
+## Analytics
+
+Vercel Web Analytics (`@vercel/analytics`) is mounted once in `src/App.tsx`. It counts page views without cookies and only reports on a Vercel deployment (turn it on under the project's Analytics tab). `src/lib/analytics.ts` removes search words and groups every `/resumes/<id>/...` address into one page before anything is sent. The Privacy Policy and Cookies pages describe it, so change them if you change what is collected.
+
 ## SEO
 
 Everything search-related comes from one file, `src/seo/site.ts` (site address, each page's title and description, the FAQ, the JSON-LD). Change the address or any text there and everything below follows.
