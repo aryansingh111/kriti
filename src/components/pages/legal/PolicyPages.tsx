@@ -76,6 +76,9 @@ const PRIVACY: LegalDoc = {
                 <B>Anonymous visit statistics.</B> We also use Vercel Web Analytics to count visits. For each page view it receives the page address, the page you came from, your approximate location (country), and your browser, operating system and device type. It sets no cookies and cannot be used to identify you, and nothing from your resume is included. The words you type into the template search are removed, and the address of one of your own resumes is counted simply as &ldquo;a resume page&rdquo;.
               </>,
               <>
+                <B>A &ldquo;people online now&rdquo; count.</B> While Kriti is open and you are using it, your browser sends a random number it made up (kept only for that visit, in your browser&rsquo;s session storage) to our counting service about once a minute, for at most the first 15 minutes of a visit. The number is counted and then forgotten after about two minutes. It is not linked to you, and no cookie, IP address or resume content is stored with it.
+              </>,
+              <>
                 <B>Bug reports and feature requests.</B> The feedback form prepares an email in your own email app. Nothing is sent until you press send in that app. You can see the full message first, and you choose whether to add basic browser details (browser name, screen size and theme). Your resume is never attached.
               </>,
               <>
@@ -95,7 +98,7 @@ const PRIVACY: LegalDoc = {
             Like any website, Kriti is served by a hosting provider. When your browser loads the site, the host may automatically record technical details such as your IP address, the time of the request and the page asked for. These logs are used to keep the site secure and running, and they never include anything you type into Kriti.
           </P>
           <P>
-            Fonts and images are served from the Kriti site itself, and so is the Vercel analytics script. The visit statistics it collects are sent to Vercel, which provides our hosting. If, and only if, you accept Google Analytics, Google&rsquo;s script is also loaded from googletagmanager.com. No other company&rsquo;s scripts are loaded.
+            Fonts and images are served from the Kriti site itself, and so is the Vercel analytics script. The visit statistics it collects are sent to Vercel, which provides our hosting. If, and only if, you accept Google Analytics, Google&rsquo;s script is also loaded from googletagmanager.com. The &ldquo;people online now&rdquo; count is kept in a small database run by Upstash and connected through Vercel. No other company&rsquo;s scripts are loaded.
           </P>
         </>
       ),
@@ -116,7 +119,7 @@ const PRIVACY: LegalDoc = {
       title: 'Sharing',
       body: (
         <>
-          <P>We do not share your information with anyone, because we do not hold your resume. Vercel processes the anonymous visit statistics for us, and Google does the same if you accept Google Analytics. Google may process that data on servers outside India. The one other exception is where the law requires us to disclose something we hold, which would only ever be a report you emailed to us.</P>
+          <P>We do not share your information with anyone, because we do not hold your resume. Vercel processes the anonymous visit statistics for us, Upstash holds the &ldquo;people online now&rdquo; numbers, and Google processes analytics if you accept Google Analytics. Google may process that data on servers outside India. The one other exception is where the law requires us to disclose something we hold, which would only ever be a report you emailed to us.</P>
           <P>
             If you download a PDF and give it to an employer, a job portal or anyone else, that is your choice, and their privacy policy applies to what they do with it. Resumes usually contain a phone number, an email address and sometimes a photo, so share them with care.
           </P>
@@ -384,6 +387,11 @@ const COOKIES: LegalDoc = {
                   <td className="px-4 py-3.5">Small template and resume preview images, saved so pages open faster. They can be remade at any time.</td>
                 </tr>
                 <tr>
+                  <td className="px-4 py-3.5 font-mono text-[13px] font-semibold text-ink">kriti:vid</td>
+                  <td className="px-4 py-3.5">Session storage</td>
+                  <td className="px-4 py-3.5">A random number used only to count how many people are online now. It is removed when you close the tab.</td>
+                </tr>
+                <tr>
                   <td className="px-4 py-3.5 font-mono text-[13px] font-semibold text-ink">kriti:analytics</td>
                   <td className="px-4 py-3.5">Local storage</td>
                   <td className="px-4 py-3.5">Your answer about Google Analytics (yes or no), so we do not ask again.</td>
@@ -405,7 +413,7 @@ const COOKIES: LegalDoc = {
               </tbody>
             </table>
           </div>
-          <P>The first four are needed for Kriti to work as you expect, so they are used without asking, and none of them identify you. The two Google cookies are set only if you accept analytics, and are removed if you turn it off.</P>
+          <P>The first five are needed for Kriti to work as you expect, so they are used without asking, and none of them identify you. The two Google cookies are set only if you accept analytics, and are removed if you turn it off.</P>
         </>
       ),
     },

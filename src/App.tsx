@@ -14,6 +14,7 @@ import { ConsentBanner } from '@/components/ConsentBanner'
 import { SiteNav } from '@/components/SiteNav'
 import { scrubAnalytics } from '@/lib/analytics'
 import { trackPageView } from '@/lib/ga'
+import { startLive } from '@/lib/live'
 import { isRail, paths, showsSiteNav } from '@/lib/routes'
 import { useTheme } from '@/lib/theme'
 import { useSeo } from '@/seo/useSeo'
@@ -41,6 +42,8 @@ function RouteFlash() {
 function Shell() {
   const { pathname } = useLocation()
   useSeo()
+  // the "people online now" count: this visitor is counted for as long as the site is open and in use
+  useEffect(() => startLive(), [])
   // after useSeo, so the page title is already the new page's when Google Analytics reads it
   useEffect(() => {
     trackPageView(pathname)

@@ -1,6 +1,7 @@
 import { ArrowRight, ArrowUp, Bug, Check, Lightbulb, ShieldCheck } from 'lucide-react'
 import { Link } from 'react-router'
 import { IndiaFlag } from '@/components/IndiaFlag'
+import { LivePill } from '@/components/home/LivePill'
 import { StudioMark, WordMark } from '@/components/Logo'
 import { ButtonLink } from '@/components/ui/Button'
 import { paths } from '@/lib/routes'
@@ -86,6 +87,8 @@ export function SiteFooter() {
               <IndiaFlag />
               Made in India, for India
             </Link>
+            {/* appears once at least a few people are online (see LivePill) */}
+            <LivePill tone="dark" className="mt-3 flex w-fit" />
           </div>
 
           <nav aria-label="Footer">

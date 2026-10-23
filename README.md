@@ -61,6 +61,14 @@ Modern, simple and green on white: soft rounded cards, a friendly sans-serif (Pl
 
 **Vercel Web Analytics** is separate and cookie-free. Vercel Web Analytics (`@vercel/analytics`) is mounted once in `src/App.tsx`. It counts page views without cookies and only reports on a Vercel deployment (turn it on under the project's Analytics tab). `src/lib/analytics.ts` removes search words and groups every `/resumes/<id>/...` address into one page before anything is sent. The Privacy Policy and Cookies pages describe it, so change them if you change what is collected.
 
+## People online now
+
+The pill in the footer, under the "Made in India, for India" badge ("12 people online now"; on every page that has the footer) comes from `api/live.ts`, a Vercel function that keeps anonymous visitor ids in Upstash Redis (a sorted set scored by time; an id counts for 130 seconds after its last check-in). `src/lib/live.ts` checks in once a minute while the tab is visible and in use, and `LivePill` shows the number only when it is 3 or more (`MIN`).
+
+**Command budget.** The free Upstash plan allows 50,000 commands a month, so the design is thrifty: one Redis command per check-in (a small Lua script adds the id, drops old ids and counts), a check-in a minute, stop after 2 idle minutes, and stop 15 minutes into a visit (the clock survives reloads, and the pill is hidden for that visitor afterwards). One visit therefore costs at most about 16 commands, so 50,000 commands cover roughly 3,000 visits a month; a typical short visit costs 3 to 5, which stretches that to 10,000 or more. Watch the usage graph in the Upstash console after the first days, and tune `PING_MS`, `IDLE_MS` and `MAX_VISIT_MS` in `src/lib/live.ts` (or the window in `api/live.ts`) if needed. A paid plan removes the worry.
+
+It needs the Upstash environment variables on Vercel (`UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`, or the `KV_REST_API_*` pair). Locally the function does not run with `npm run dev`; use `npx vercel dev`, otherwise the pill simply stays hidden. `vercel.json` sends `/resumes/...` addresses to the app so a refresh in the editor does not give a 404.
+
 ## SEO
 
 Everything search-related comes from one file, `src/seo/site.ts` (site address, each page's title and description, the FAQ, the JSON-LD). Change the address or any text there and everything below follows.
