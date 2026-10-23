@@ -57,7 +57,9 @@ Modern, simple and green on white: soft rounded cards, a friendly sans-serif (Pl
 
 ## Analytics
 
-Vercel Web Analytics (`@vercel/analytics`) is mounted once in `src/App.tsx`. It counts page views without cookies and only reports on a Vercel deployment (turn it on under the project's Analytics tab). `src/lib/analytics.ts` removes search words and groups every `/resumes/<id>/...` address into one page before anything is sent. The Privacy Policy and Cookies pages describe it, so change them if you change what is collected.
+**Google Analytics 4** (`G-9DX945XHJ5`, `src/lib/ga.ts`) is behind a consent box (`ConsentBanner`): nothing is loaded from Google or sent until the visitor presses Accept, and the choice can be changed on the Cookies page. It sends one `page_view` per page, only from `www.kriti-studio.com`, with search words removed and `/resumes/<id>` grouped. In the GA4 stream settings, turn **off** "Page changes based on browser history events" so pages are not counted twice. The measurement ID and host are constants at the top of `ga.ts`.
+
+**Vercel Web Analytics** is separate and cookie-free. Vercel Web Analytics (`@vercel/analytics`) is mounted once in `src/App.tsx`. It counts page views without cookies and only reports on a Vercel deployment (turn it on under the project's Analytics tab). `src/lib/analytics.ts` removes search words and groups every `/resumes/<id>/...` address into one page before anything is sent. The Privacy Policy and Cookies pages describe it, so change them if you change what is collected.
 
 ## SEO
 

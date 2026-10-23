@@ -10,8 +10,10 @@ import { CookiesPage, PrivacyPage, TermsPage } from '@/components/pages/legal/Po
 import { NotFound } from '@/components/pages/NotFound'
 import { ResumesPage } from '@/components/pages/ResumesPage'
 import { BackToTop } from '@/components/BackToTop'
+import { ConsentBanner } from '@/components/ConsentBanner'
 import { SiteNav } from '@/components/SiteNav'
 import { scrubAnalytics } from '@/lib/analytics'
+import { trackPageView } from '@/lib/ga'
 import { isRail, paths, showsSiteNav } from '@/lib/routes'
 import { useTheme } from '@/lib/theme'
 import { useSeo } from '@/seo/useSeo'
@@ -39,6 +41,10 @@ function RouteFlash() {
 function Shell() {
   const { pathname } = useLocation()
   useSeo()
+  // after useSeo, so the page title is already the new page's when Google Analytics reads it
+  useEffect(() => {
+    trackPageView(pathname)
+  }, [pathname])
   const pageKey = pathname.replace(/\/edit\/[^/]+$/, '/edit')
   // flash the logo on every page change, but not on first load (a full reload already shows the splash from index.html)
   const [seenKey, setSeenKey] = useState(pageKey)
@@ -57,6 +63,7 @@ function Shell() {
       {/* the header lives here, outside the page that fades, so it stays put and its pill can slide between pages */}
       {showsSiteNav(pathname) && <SiteNav />}
       {showsSiteNav(pathname) && <BackToTop />}
+      {showsSiteNav(pathname) && <ConsentBanner />}
       <motion.div key={pageKey} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.16 }}>
         <Suspense fallback={<Loading />}>
           <Outlet />

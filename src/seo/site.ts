@@ -98,7 +98,7 @@ export const PAGES: PageSeo[] = [
   {
     path: '/privacy',
     title: 'Privacy Policy | Kriti Studio',
-    description: 'How Kriti Studio handles your information: your resume stays on your device, with no accounts, no ads and only cookie-free visit counts.',
+    description: 'How Kriti Studio handles your information: your resume stays on your device, with no accounts and no ads. Google Analytics runs only if you accept it.',
     h1: 'Privacy Policy',
     intro: 'Kriti Studio works inside your browser. Your resume is yours, and we never receive it.',
     crumb: 'Privacy Policy',
@@ -122,9 +122,9 @@ export const PAGES: PageSeo[] = [
   {
     path: '/cookies',
     title: 'Cookies and Storage | Kriti Studio',
-    description: 'Kriti Studio sets no cookies. See exactly what it saves in your browser (your resumes and theme) and how to clear it.',
+    description: 'Kriti Studio sets no cookies unless you accept Google Analytics. See exactly what it saves in your browser (your resumes and theme) and how to change your choice.',
     h1: 'Cookies and Storage',
-    intro: 'Kriti Studio sets no cookies. It saves your work in your own browser, and this page says exactly what that means.',
+    intro: 'Kriti Studio sets no cookies until you say yes. It saves your work in your own browser, and this page says exactly what that means.',
     crumb: 'Cookies and Storage',
     schema: 'WebPage',
     index: true,
@@ -147,6 +147,16 @@ const PRIVATE: PageSeo = {
   priority: 0,
 }
 
+/** The editor, template switcher and review page of one resume (/resumes/<id>/...). */
+const EDITOR: PageSeo = {
+  ...PRIVATE,
+  title: 'Resume Editor | Kriti Studio',
+  description: 'Edit your resume in Kriti Studio. It is stored privately in this browser.',
+  h1: 'Resume editor',
+  intro: 'Edit your resume. It is stored privately in this browser.',
+  crumb: 'Resume editor',
+}
+
 const NOT_FOUND: PageSeo = {
   ...PRIVATE,
   path: '/404',
@@ -165,7 +175,8 @@ export function pageFor(pathname: string): PageSeo {
   const clean = pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname
   const found = PAGES.find((p) => p.path === clean)
   if (found) return found
-  return clean === '/resumes' || clean.startsWith('/resumes/') ? PRIVATE : NOT_FOUND
+  if (clean === '/resumes') return PRIVATE
+  return clean.startsWith('/resumes/') ? EDITOR : NOT_FOUND
 }
 
 export const absUrl = (path: string) => (path === '/' ? SITE.url + '/' : SITE.url + path)
@@ -193,7 +204,7 @@ export const FAQS: Faq[] = [
   },
   {
     q: 'Is my personal data safe?',
-    a: 'Your resume never leaves your device. Everything, including the PDF, is made inside your browser, and your resumes are saved only in your browser storage. There are no ads, and visits are counted with cookie-free analytics that never see your resume. Because of this we cannot read or recover your resumes, so use Export data to keep a backup file.',
+    a: 'Your resume never leaves your device. Everything, including the PDF, is made inside your browser, and your resumes are saved only in your browser storage. There are no ads. Visits are counted with analytics that never see your resume: Vercel without cookies, and Google Analytics only if you accept it when asked. Because of this we cannot read or recover your resumes, so use Export data to keep a backup file.',
   },
   {
     q: 'Are the templates ATS-friendly?',

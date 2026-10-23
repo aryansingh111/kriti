@@ -1,9 +1,10 @@
 import { Link } from 'react-router'
 import { paths } from '@/lib/routes'
 import { LegalPage, type LegalDoc } from './LegalPage'
+import { AnalyticsChoice } from './AnalyticsChoice'
 import { List, P } from './legalParts'
 
-const UPDATED = '22 October 2026'
+const UPDATED = '23 October 2026'
 
 const A = ({ to, children }: { to: string; children: React.ReactNode }) => (
   <Link to={to} className="font-semibold text-brand underline decoration-brand/30 underline-offset-2 hover:decoration-brand">
@@ -21,7 +22,7 @@ const PRIVACY: LegalDoc = {
   updated: UPDATED,
   summary: [
     'Your resume, photo and details stay on your device. They are never uploaded to us.',
-    'There is no sign-up, no account and no advertising. Visits are counted with cookie-free analytics that never see your resume.',
+    'There is no sign-up, no account and no advertising. Analytics that never see your resume count visits: Vercel always (without cookies), and Google Analytics only if you accept.',
     'Beyond those anonymous counts, we only see what you choose to send us, such as a bug report you email.',
   ],
   sections: [
@@ -63,13 +64,16 @@ const PRIVACY: LegalDoc = {
       body: (
         <>
           <P>
-            <B>Nothing from your resume.</B> Kriti has no accounts and no database of users. The site does not use advertising, tracking pixels or social-media plug-ins, and it does not set cookies.
+            <B>Nothing from your resume.</B> Kriti has no accounts and no database of users. The site does not use advertising, tracking pixels or social-media plug-ins, and it sets no cookies unless you accept Google Analytics.
           </P>
           <P>The information that can reach us is the following:</P>
           <List
             items={[
               <>
-                <B>Anonymous visit statistics.</B> We use Vercel Web Analytics to count visits. For each page view it receives the page address, the page you came from, your approximate location (country), and your browser, operating system and device type. It sets no cookies and cannot be used to identify you, and nothing from your resume is included. The words you type into the template search are removed, and the address of one of your own resumes is counted simply as &ldquo;a resume page&rdquo;.
+                <B>Google Analytics, only if you accept.</B> The first time you visit, a small box asks whether we may count visits with Google Analytics. Until you press Accept, nothing is loaded from Google and nothing is sent. If you accept, Google Analytics 4 sets two cookies and receives the page address, the page title, the page you came from, your approximate location, your browser, operating system, device and screen size, and an anonymous ID that tells visits apart. Google does not store IP addresses for Analytics. Nothing from your resume is sent, search words are removed from page addresses, and a resume address is reported as one page. You can change your mind at any time on the <A to={paths.cookies}>Cookies and Storage</A> page.
+              </>,
+              <>
+                <B>Anonymous visit statistics.</B> We also use Vercel Web Analytics to count visits. For each page view it receives the page address, the page you came from, your approximate location (country), and your browser, operating system and device type. It sets no cookies and cannot be used to identify you, and nothing from your resume is included. The words you type into the template search are removed, and the address of one of your own resumes is counted simply as &ldquo;a resume page&rdquo;.
               </>,
               <>
                 <B>Bug reports and feature requests.</B> The feedback form prepares an email in your own email app. Nothing is sent until you press send in that app. You can see the full message first, and you choose whether to add basic browser details (browser name, screen size and theme). Your resume is never attached.
@@ -91,7 +95,7 @@ const PRIVACY: LegalDoc = {
             Like any website, Kriti is served by a hosting provider. When your browser loads the site, the host may automatically record technical details such as your IP address, the time of the request and the page asked for. These logs are used to keep the site secure and running, and they never include anything you type into Kriti.
           </P>
           <P>
-            Fonts and images are served from the Kriti site itself, and so is the analytics script. The visit statistics it collects are sent to Vercel, which provides our hosting and analytics. No other company&rsquo;s scripts are loaded.
+            Fonts and images are served from the Kriti site itself, and so is the Vercel analytics script. The visit statistics it collects are sent to Vercel, which provides our hosting. If, and only if, you accept Google Analytics, Google&rsquo;s script is also loaded from googletagmanager.com. No other company&rsquo;s scripts are loaded.
           </P>
         </>
       ),
@@ -102,7 +106,7 @@ const PRIVACY: LegalDoc = {
       body: (
         <>
           <P>When you send us a report or a message, we use it only to read it, fix the problem, consider the idea, and reply to you if you asked us to. We do not sell it, rent it or use it for marketing.</P>
-          <P>The visit statistics are used only to see which pages are used, so that we can improve Kriti.</P>
+          <P>The visit statistics, from Vercel and from Google Analytics if you accepted it, are used only to see which pages are used, so that we can improve Kriti. We do not use them for advertising.</P>
           <P>We do not make decisions about you with automated tools, and we do not build profiles.</P>
         </>
       ),
@@ -112,7 +116,7 @@ const PRIVACY: LegalDoc = {
       title: 'Sharing',
       body: (
         <>
-          <P>We do not share your information with anyone, because we do not hold your resume. Vercel processes the anonymous visit statistics for us. The one other exception is where the law requires us to disclose something we hold, which would only ever be a report you emailed to us.</P>
+          <P>We do not share your information with anyone, because we do not hold your resume. Vercel processes the anonymous visit statistics for us, and Google does the same if you accept Google Analytics. Google may process that data on servers outside India. The one other exception is where the law requires us to disclose something we hold, which would only ever be a report you emailed to us.</P>
           <P>
             If you download a PDF and give it to an employer, a job portal or anyone else, that is your choice, and their privacy policy applies to what they do with it. Resumes usually contain a phone number, an email address and sometimes a photo, so share them with care.
           </P>
@@ -134,7 +138,10 @@ const PRIVACY: LegalDoc = {
                 <B>Delete it:</B> delete a resume from My resumes, or clear this site&rsquo;s data in your browser settings to remove everything.
               </>,
               <>
-                <B>Turn off visit counting:</B> use a content blocker or tracking protection in your browser. Kriti works exactly the same without it.
+                <B>Google Analytics:</B> you are asked before it starts, and you can turn it off at any time on the <A to={paths.cookies}>Cookies and Storage</A> page, which also removes its cookies. Turning it off does not change how Kriti works.
+              </>,
+              <>
+                <B>Vercel visit counts:</B> these use no cookies. You can stop them with a content blocker or tracking protection in your browser.
               </>,
               <>
                 <B>Messages you sent us:</B> write to us through the <A to={paths.feedback()}>feedback page</A> and ask to see or delete them. Under the Digital Personal Data Protection Act, 2023, you may ask to access, correct or erase personal data we hold about you, and we will respond within a reasonable time.
@@ -315,10 +322,10 @@ const TERMS: LegalDoc = {
 const COOKIES: LegalDoc = {
   label: 'Policy',
   title: 'Cookies and Storage',
-  sub: 'Kriti sets no cookies. It saves your work in your own browser, and here is exactly what that means.',
+  sub: 'Kriti sets no cookies until you say yes. It saves your work in your own browser, and here is exactly what that means.',
   updated: UPDATED,
   summary: [
-    'No cookies and no advertising storage. Visit counts use cookie-free analytics.',
+    'No cookies unless you accept Google Analytics. Nothing is loaded from Google until you do.',
     'Your resumes, theme and preview pictures are saved on your device so you do not lose your work.',
     'You can clear all of it at any time from your browser settings.',
   ],
@@ -329,8 +336,19 @@ const COOKIES: LegalDoc = {
       body: (
         <>
           <P>
-            Kriti does <B>not</B> set or read cookies. There are no analytics cookies, advertising cookies or social-media cookies, so there is no cookie banner to accept.
+            Kriti does <B>not</B> set cookies on its own, and it has no advertising or social-media cookies. The only cookies come from <B>Google Analytics</B>, and only after you press Accept in the small box that asks. If you press &ldquo;No thanks&rdquo;, or ignore it, none are set and nothing is loaded from Google.
           </P>
+          <P>The Vercel visit counts mentioned in our <A to={paths.privacy}>Privacy Policy</A> use no cookies at all.</P>
+        </>
+      ),
+    },
+    {
+      id: 'choice',
+      title: 'Your choice',
+      body: (
+        <>
+          <P>You can change your answer here whenever you like.</P>
+          <AnalyticsChoice />
         </>
       ),
     },
@@ -365,10 +383,29 @@ const COOKIES: LegalDoc = {
                   <td className="px-4 py-3.5">IndexedDB</td>
                   <td className="px-4 py-3.5">Small template and resume preview images, saved so pages open faster. They can be remade at any time.</td>
                 </tr>
+                <tr>
+                  <td className="px-4 py-3.5 font-mono text-[13px] font-semibold text-ink">kriti:analytics</td>
+                  <td className="px-4 py-3.5">Local storage</td>
+                  <td className="px-4 py-3.5">Your answer about Google Analytics (yes or no), so we do not ask again.</td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-3.5 font-mono text-[13px] font-semibold text-ink">_ga</td>
+                  <td className="px-4 py-3.5">Cookie, 2 years</td>
+                  <td className="px-4 py-3.5">
+                    <B>Only if you accept analytics.</B> A random ID from Google Analytics that tells visits from the same browser apart.
+                  </td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-3.5 font-mono text-[13px] font-semibold text-ink">_ga_9DX945XHJ5</td>
+                  <td className="px-4 py-3.5">Cookie, 2 years</td>
+                  <td className="px-4 py-3.5">
+                    <B>Only if you accept analytics.</B> Keeps track of the visit you are in now.
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>
-          <P>All of these are needed for Kriti to work as you expect, which is why they are used without asking. None of them identify you, and none are used to track you across other websites.</P>
+          <P>The first four are needed for Kriti to work as you expect, so they are used without asking, and none of them identify you. The two Google cookies are set only if you accept analytics, and are removed if you turn it off.</P>
         </>
       ),
     },
@@ -389,7 +426,7 @@ const COOKIES: LegalDoc = {
       title: 'Other companies',
       body: (
         <P>
-          Kriti does not load fonts, maps, videos or ad scripts from other companies. The one outside service is Vercel Web Analytics, which counts page visits without cookies. Its script comes from the Kriti address and the counts go to Vercel. See the <A to={paths.privacy}>Privacy Policy</A> for what it records. If this ever changes, we will update this page first.
+          Kriti does not load fonts, maps, videos or ad scripts from other companies. Two outside services count visits. Vercel Web Analytics uses no cookies, and its script comes from the Kriti address. Google Analytics is loaded from Google only if you accept it. See the <A to={paths.privacy}>Privacy Policy</A> for what each records. If this ever changes, we will update this page first.
         </P>
       ),
     },
